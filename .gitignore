@@ -1,0 +1,42 @@
+# Python virtual environments
+venv/
+ENV/
+env/
+.venv/
+.ENV/
+.pyenv/
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment files
+.env
+.env.*
+
+# Pytest
+.pytest_cache/
+
+# Mypy
+.mypy_cache/
+dmypy.json
+dmypy.log
+
+# Coverage reports
+.coverage
+.coverage.*
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints
+
+# Editor / IDE files
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
