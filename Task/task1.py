@@ -12,11 +12,14 @@ logger.setLevel(logging.INFO)
 #defining the agent's task
 class NameCollectorTask(AgentTask[str]):
     def __init__(self):
+
+        # this is the task instruction
         super().__init__(
             instructions= """Collect only the user's name. Nothing more nor less.""",
         )
 
     async def on_enter(self):
+        # when executing this task, this is what agent will talk like
         await self.session.generate_reply(
             instructions= " Ask poilitely the name only form the user",
         )
