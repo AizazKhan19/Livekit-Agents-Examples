@@ -1,6 +1,6 @@
 import logging
 from dotenv import load_dotenv
-from livekit.agents import JobContext, JobProcess, Agent, AgentSession, AgentServer, cli, inference, function_tool
+from livekit.agents import JobContext, JobProcess, Agent, AgentSession, AgentServer, RunContext, cli, inference, function_tool
 from livekit.plugins import silero
 
 load_dotenv()
@@ -8,22 +8,18 @@ load_dotenv()
 logger = logging.getLogger("agent-transfer")
 logger.setLevel(logging.INFO)
 
-server = AgentServer()
 
 
-def prewarm(proc: JobProcess):
-    proc.userdata["vad"] = silero.VAD.load()
-
-
-server.setup_fnc = prewarm
 
 
 class ShortAgent(Agent):
-    def __init__(self) -> None:
+    def __init__(self, chat_ctx=None) -> None:
         super().__init__(
             instructions="""
                 You are a helpful agent. When the user speaks, you listen and respond. Be as brief as possible. Arguably too brief.
-            """
+            """,
+            chat_ctx=chat_ctx
+
         )
 
     async def on_enter(self):
@@ -32,15 +28,16 @@ class ShortAgent(Agent):
     @function_tool
     async def change_agent(self):
         """Change the agent to the long agent."""
-        self.session.update_agent(LongAgent())
+        self.session.update_agent(LongAgent(chat_ctx=self.chat_ctx))
 
 
 class LongAgent(Agent):
-    def __init__(self) -> None:
+    def __init__(self, chat_ctx=None) -> None:
         super().__init__(
             instructions="""
-                You are a helpful agent. When the user speaks, you listen and respond in overly verbose, flowery, obnoxiously detailed sentences.
-            """
+                You are a helpful agent. When the user speaks, you listen and respond in simple sentences.
+            """,
+            chat_ctx=chat_ctx
         )
 
     async def on_enter(self):
@@ -49,10 +46,17 @@ class LongAgent(Agent):
     @function_tool
     async def change_agent(self):
         """Change the agent to the short agent."""
-        self.session.update_agent(ShortAgent())
+        self.session.update_agent(ShortAgent(chat_ctx=self.chat_ctx))
+
+server = AgentServer()
+
+def prewarm(proc: JobProcess):
+    proc.userdata["vad"] = silero.VAD.load()
 
 
-@server.rtc_session()
+server.setup_fnc = prewarm
+
+@server.rtc_session(agent_name="transfer_agent")
 async def entrypoint(ctx: JobContext):
     ctx.log_context_fields = {"room": ctx.room.name}
 
