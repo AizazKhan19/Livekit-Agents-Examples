@@ -64,7 +64,8 @@ class GetContactTask(AgentTask[GetContactResult]):
 
     @function_tool
     async def provided(self, email: str , cell_no : str)-> None:
-        """Execute only when user provide atleast one thing either cell number or email. Also execute this when user provide both. Else do not execute"""
+        """Execute only when user provide atleast one thing either cell number or email. Also execute this when user provide both. Else do not execute.
+        if user provide only one of them then mark the other one as None"""
 
         result = GetContactResult(email= email, cell_number=cell_no)
         if result.email or result.cell_number:
@@ -138,6 +139,16 @@ class AssistantAgent(Agent):
         results = await task_group
         task_results = results.task_results
 
+        if task_results:
+            self.session.say("Thanks for providing your information.Here is the information you provided:\n")
+            print("/n -----------------Data Collected from the user-------------------/n")
+            print(f'User name: {task_results["get_name"].first_name} {task_results["get_name"].last_name}')
+            print(f'User email: {task_results["get_contact"].email}')
+            print(f'User cell number: {task_results["get_contact"].cell_number}')
+            print(f'User experience: {task_results["get_experience"].experience}')
+
+    
+
 #server initialization
 server = AgentServer()
 
@@ -145,7 +156,7 @@ def prewarm(proc: JobProcess ):
     proc.userdata['vad']=silero.VAD.load()
 server.setup_fnc = prewarm
 
-@server.rtc_session()
+@server.rtc_session(agent_name="Information_Collection_Agent")
 async def entrypoint(ctx: JobContext):
     ctx.log_context_fields = {"room": ctx.room.name}
 
