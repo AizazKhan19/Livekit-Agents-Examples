@@ -65,7 +65,7 @@ def prewarm(proc: JobProcess):
 server.setup_fnc=prewarm
 
 
-@server.rtc_session()
+@server.rtc_session(agent_name="customer_service_agent")
 async def entrypoint(ctx: JobContext):
     ctx.log_context_fields={"room":ctx.room.name}
     
