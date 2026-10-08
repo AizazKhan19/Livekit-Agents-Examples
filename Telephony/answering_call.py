@@ -21,7 +21,8 @@ class AnswerCallAgent(Agent):
     def __init__(self):
         super().__init__(
             instructions = """
-                            You are a helpful assistant that answers the incoming call and provide information to the user on the topic."""
+                            You are a helpful assistant that answers the incoming call and provide information to the user on the topic.""",
+            allow_interruptions=True
         )
 
 
@@ -43,7 +44,7 @@ async def entrypoint(ctx: JobContext):
     )
 
     agent = AnswerCallAgent()
-    session.start(agent=agent, room=ctx.room)
+    await session.start(agent=agent, room=ctx.room)
     await ctx.connect()
 
 if __name__ == "__main__":
